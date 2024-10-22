@@ -113,72 +113,158 @@ function infiniteSection() {
 infiniteSection();
 
 // ------------- CONTROL VIDEO -------------
-const thumbnailContainer = document.getElementById("thumbnailContainer");
-const closeModalBtn = document.getElementById("closeModalBtn");
-const overlayBackground = document.getElementById("overlayBackground");
-const videoModal = document.getElementById("videoModal");
-const controlButton = document.getElementById("controlButton");
-const video = document.getElementById("myVideo");
+function controlVideo() {
+  const thumbnailContainer = document.getElementById("thumbnailContainer");
+  const closeModalBtn = document.getElementById("closeModalBtn");
+  const overlayBackground = document.getElementById("overlayBackground");
+  const videoModal = document.getElementById("videoModal");
+  const controlButton = document.getElementById("controlButton");
+  const video = document.getElementById("myVideo");
 
-// Set initial video volume to 40%
-video.volume = 0.4;
+  video.volume = 0.4;
 
-// Open the modal with GSAP animation when the thumbnail is clicked
-thumbnailContainer.addEventListener("click", () => {
-  gsap.to(videoModal, {
-    display: "block",
-    scale: 1,
-    opacity: 1,
-    duration: 0.8,
-    ease: "power3.out",
+  thumbnailContainer.addEventListener("click", () => {
+    gsap.to(videoModal, {
+      display: "block",
+      scale: 1,
+      opacity: 1,
+      duration: 0.8,
+      ease: "power3.out",
+    });
+    overlayBackground.style.display = "block";
   });
-  overlayBackground.style.display = "block";
-});
 
-// Close the modal
-closeModalBtn.addEventListener("click", closeModal);
-overlayBackground.addEventListener("click", closeModal);
+  closeModalBtn.addEventListener("click", closeModal);
+  overlayBackground.addEventListener("click", closeModal);
 
-function closeModal() {
-  gsap.to(videoModal, {
-    scale: 0.5,
-    opacity: 0,
-    duration: 0.8,
-    ease: "power3.in",
-    onComplete: () => {
-      videoModal.style.display = "none";
-      overlayBackground.style.display = "none";
-      video.pause(); // Pause video when closing the modal
-      controlButton.textContent = "Play"; // Reset button text to Play
-    },
+  function closeModal() {
+    gsap.to(videoModal, {
+      scale: 0.5,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power3.in",
+      onComplete: () => {
+        videoModal.style.display = "none";
+        overlayBackground.style.display = "none";
+        video.pause();
+        controlButton.textContent = "Play";
+      },
+    });
+  }
+
+  controlButton.addEventListener("click", () => {
+    if (video.paused) {
+      video.play();
+      controlButton.textContent = "Pause";
+    } else {
+      video.pause();
+      controlButton.textContent = "Play";
+    }
+  });
+
+  video.addEventListener("play", () => {
+    controlButton.textContent = "Pause";
+  });
+
+  video.addEventListener("pause", () => {
+    controlButton.textContent = "Play";
+  });
+
+  video.addEventListener("ended", () => {
+    controlButton.textContent = "Play";
   });
 }
+controlVideo();
 
-// Play or pause the video on button click
-controlButton.addEventListener("click", () => {
-  if (video.paused) {
-    video.play();
-    controlButton.textContent = "Pause"; // Change button text to Pause
-  } else {
-    video.pause();
-    controlButton.textContent = "Play"; // Change button text to Play
-  }
-});
+// ------------- ARTICLE CURSOR -------------
+function articleVideo() {
+  const openVideoPopup = (videoSrc) => {
+    const popup = document.getElementById("videoPopup");
+    const popupVideo = document.getElementById("popupVideo");
 
-// Update the button state when the video is playing
-video.addEventListener("play", () => {
-  controlButton.textContent = "Pause";
-});
+    popupVideo.querySelector("source").src = videoSrc;
+    popupVideo.load();
 
-// Update the button state when the video is paused
-video.addEventListener("pause", () => {
-  controlButton.textContent = "Play";
-});
+    // popup.classList.toggle("no-scroll");
+    gsap.to(popup, {
+      display: "flex",
+      opacity: 1,
+      duration: 0.5,
+      ease: "power2.out",
+    });
+  };
 
-// Ensure the button text resets when the video ends
-video.addEventListener("ended", () => {
-  controlButton.textContent = "Play";
-});
+  const closePopup = () => {
+    const popup = document.getElementById("videoPopup");
+    gsap.to(popup, {
+      opacity: 0,
+      duration: 0.5,
+      ease: "power2.in",
+      onComplete: () => {
+        popup.style.display = "none";
+        document.getElementById("popupVideo").pause();
+      },
+    });
+  };
+
+  document.querySelectorAll(".clickable-video").forEach((video) => {
+    video.addEventListener("click", function () {
+      const videoSrc = this.querySelector("source").src;
+      openVideoPopup(videoSrc);
+    });
+  });
+
+  document.querySelector(".close-btn").addEventListener("click", closePopup);
+
+  const popup = document.getElementById("videoPopup");
+  popup.addEventListener("click", (e) => {
+    if (e.target === popup) {
+      closePopup();
+    }
+  });
+
+  const popupVideo = document.getElementById("popupVideo");
+  const playPauseBtn = document.getElementById("playPauseBtn");
+  const volumeSlider = document.getElementById("volumeSlider");
+
+  playPauseBtn.addEventListener("click", () => {
+    if (popupVideo.paused) {
+      popupVideo.play();
+      playPauseBtn.textContent = "Pause";
+    } else {
+      popupVideo.pause();
+      playPauseBtn.textContent = "Play";
+    }
+  });
+
+  volumeSlider.addEventListener("input", (e) => {
+    popupVideo.volume = e.target.value;
+  });
+
+  const maximizeBtn = document.getElementById("maximizeBtn");
+  const customControls = document.querySelector(".custom-controls");
+  const popupContent = document.querySelector(".popup-content");
+
+  maximizeBtn.addEventListener("click", () => {
+    if (!document.fullscreenElement) {
+      popupContent.requestFullscreen().catch((err) => {
+        alert(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+
+      customControls.style.marginLeft = "0";
+      maximizeBtn.textContent = "Minimize";
+    } else {
+      document.exitFullscreen().catch((err) => {
+        alert(`Error attempting to exit full-screen mode: ${err.message}`);
+      });
+
+      customControls.style.marginLeft = "60px";
+      maximizeBtn.textContent = "Maximize";
+    }
+  });
+}
+articleVideo();
+
 // ------------- HEART -------------
 function heart() {
   const heartContainers = document.querySelectorAll(".heart-container");
@@ -194,6 +280,7 @@ function heart() {
 
     heartCountElement.textContent = likeCount;
     heartCheckbox.checked = likeCount > 0;
+    updateHeartStyle(heartCheckbox, likeCount);
 
     heartCheckbox.addEventListener("change", function () {
       if (this.checked) {
@@ -204,8 +291,18 @@ function heart() {
 
       heartCountElement.textContent = likeCount;
       localStorage.setItem(heartId, likeCount);
+      updateHeartStyle(this, likeCount);
     });
   });
+}
+
+function updateHeartStyle(checkbox, count) {
+  const heartLabel = checkbox.nextElementSibling;
+  if (checkbox.checked) {
+    heartLabel.style.color = 'red';
+  } else {
+    heartLabel.style.color = '';
+  }
 }
 heart();
 
