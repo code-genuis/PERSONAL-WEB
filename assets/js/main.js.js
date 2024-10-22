@@ -275,26 +275,25 @@ function heart() {
     const heartCountElement = container.querySelector(".heart-count");
     const heartId = container.getAttribute("data-heart-id");
 
-    const likeCount = parseInt(localStorage.getItem(heartId) || "0");
+    let likeCount = parseInt(localStorage.getItem(heartId) || "0");
     heartCountElement.textContent = likeCount;
-    heartCheckbox.checked = false;
+    heartCheckbox.checked = likeCount > 0;
 
     heartCheckbox.addEventListener("change", function () {
-      let updatedCount = likeCount;
-
       if (this.checked) {
-        updatedCount += 1;
+        likeCount += 1;
       } else {
-        updatedCount -= 1;
+        likeCount -= 1;
       }
-
-      heartCountElement.textContent = updatedCount;
-      localStorage.setItem(heartId, updatedCount.toString());
+      heartCountElement.textContent = likeCount;
+      localStorage.setItem(heartId, likeCount.toString());
     });
   });
 }
 
 heart();
+
+
 
 
 // ------------- SAVE -------------
