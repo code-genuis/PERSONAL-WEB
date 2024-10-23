@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom Video Popup with Styled UI/UX Controls</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: #f4f4f9;
+        padding: 20px;
+      }
+
+      .video-article {
+        margin-bottom: 30px;
+      }
+
+      video {
+        width: 100%;
+        max-width: 600px;
+        cursor: pointer;
+      }
+
+      .video-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .popup-content {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 90%;
+        height: 80%;
+        background-color: black;
+      }
+
+      #popupVideo {
+        width: 100%;
+        height: 100%;
+        background-color: black;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 30px;
+        color: white;
+        cursor: pointer;
+      }
+
+      /* Custom Controls */
+      .custom-controls {
+        position: absolute;
+        bottom: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 10px;
+      }
+
+      .control-btn,
+      .maximize-btn {
+        background-color: #333;
+        border: none;
+        padding: 10px 20px;
+        font-size: 14px;
+        color: white;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+      }
+
+      .control-btn:hover,
+      .maximize-btn:hover {
+        background-color: #444;
+      }
+
+      .volume-slider {
+        width: 100px;
+        cursor: pointer;
+        background: #fff;
+        appearance: none;
+        height: 5px;
+        border-radius: 5px;
+        outline: none;
+      }
+
+      .volume-slider::-webkit-slider-thumb {
+        width: 12px;
+        height: 12px;
+        background-color: #333;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+
+      /* Hide default controls */
+      video::-webkit-media-controls {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Video Articles -->
+    <article class="video-article">
+      <video class="clickable-video" preload="metadata">
+        <source src="assets/img/projects/Doze Studio.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <h2>Tab 1 Content</h2>
+      <p>Lorem ipsum dolor sit amet...</p>
+    </article>
+
+    <!-- Popup Modal for Video -->
+    <div class="video-popup" id="videoPopup">
+      <div class="popup-content">
+        <span class="close-btn">&times;</span>
+        <video id="popupVideo">
+          <source src="assets/img/projects/Portfolio-1.mp4" type="video/mp4" />
+        </video>
+
+        <!-- Custom Controls -->
+        <div class="custom-controls">
+          <button class="control-btn" id="playPauseBtn">Play</button>
+          <input
+            type="range"
+            class="volume-slider"
+            id="volumeSlider"
+            min="0"
+            max="1"
+            step="0.1"
+            value="1"
+          />
+          <button class="maximize-btn" id="maximizeBtn">Maximize</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="heart-container" data-heart-id="post1">
+      <input type="checkbox" class="heartcheckbox" id="likePost1" />
+      <label for="likePost1" class="like-button">❤️</label>
+      <div class="heart-count">0</div>
+    </div>
+    
+
+    <!-- GSAP & Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+      function heart() {
+  const heartContainers = document.querySelectorAll(".heart-container");
+
+  heartContainers.forEach((container) => {
+    const heartCheckbox = container.querySelector(".heartcheckbox");
+    const heartCountElement = container.querySelector(".heart-count");
+    const heartId = container.getAttribute("data-heart-id");
+
+    let likeCount = parseInt(localStorage.getItem(heartId) || "0");
+    heartCountElement.textContent = likeCount;
+    heartCheckbox.checked = likeCount > 0;
+
+    heartCheckbox.addEventListener("change", function () {
+      if (this.checked) {
+        likeCount += 1;
+      } else {
+        likeCount -= 1;
+      }
+      heartCountElement.textContent = likeCount;
+      localStorage.setItem(heartId, likeCount.toString());
+    });
+  });
+}
+
+heart();
+
+      // Function to open video popup with GSAP animation
+      const openVideoPopup = (videoSrc) => {
+        const popup = document.getElementById("videoPopup");
+        const popupVideo = document.getElementById("popupVideo");
+
+        // Set the source of the popup video to the clicked video
+        popupVideo.querySelector("source").src = videoSrc;
+        popupVideo.load();
+
+        // Display the popup with GSAP animation
+        gsap.to(popup, {
+          display: "flex",
+          opacity: 1,
+          duration: 0.5,
+          ease: "power2.out",
+        });
+      };
+
+      // Close popup functionality
+      const closePopup = () => {
+        const popup = document.getElementById("videoPopup");
+        gsap.to(popup, {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.in",
+          onComplete: () => {
+            popup.style.display = "none";
+            document.getElementById("popupVideo").pause();
+          },
+        });
+      };
+
+      // Event listeners for opening and closing the video popup
+      document.querySelectorAll(".clickable-video").forEach((video) => {
+        video.addEventListener("click", function () {
+          const videoSrc = this.querySelector("source").src;
+          openVideoPopup(videoSrc);
+        });
+      });
+
+      document
+        .querySelector(".close-btn")
+        .addEventListener("click", closePopup);
+
+      // Ensure that when the popup is closed, the video stops playing
+      const popup = document.getElementById("videoPopup");
+      popup.addEventListener("click", (e) => {
+        if (e.target === popup) {
+          closePopup();
+        }
+      });
+
+      // Custom Video Controls: Play, Pause, Volume
+      const popupVideo = document.getElementById("popupVideo");
+      const playPauseBtn = document.getElementById("playPauseBtn");
+      const volumeSlider = document.getElementById("volumeSlider");
+
+      // Play/Pause functionality
+      playPauseBtn.addEventListener("click", () => {
+        if (popupVideo.paused) {
+          popupVideo.play();
+          playPauseBtn.textContent = "Pause";
+        } else {
+          popupVideo.pause();
+          playPauseBtn.textContent = "Play";
+        }
+      });
+
+      // Volume control functionality
+      volumeSlider.addEventListener("input", (e) => {
+        popupVideo.volume = e.target.value;
+      });
+
+      // Maximize/Minimize functionality for fullscreen
+      const maximizeBtn = document.getElementById("maximizeBtn");
+
+      maximizeBtn.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+          document
+            .querySelector(".popup-content")
+            .requestFullscreen()
+            .catch((err) => {
+              alert(
+                `Error attempting to enable full-screen mode: ${err.message}`
+              );
+            });
+          maximizeBtn.textContent = "Minimize";
+        } else {
+          document.exitFullscreen().catch((err) => {
+            alert(`Error attempting to exit full-screen mode: ${err.message}`);
+          });
+          maximizeBtn.textContent = "Maximize";
+        }
+      });
+    </script>
+  </body>
+</html>
